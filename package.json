@@ -3,9 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "description": "Packaged desktop build of MailHub (Electron + embedded Postgres) with license-gated activation.",
+  "main": "electron/main.js",
   "scripts": {
+    "start": "electron .",
     "license:keygen": "node license/scripts/generate-keypair.js",
     "license:issue": "node license/scripts/issue-license.js",
-    "license:test": "node license/scripts/self-test.js"
+    "license:test": "node license/scripts/self-test.js",
+    "build:win": "electron-builder --win"
+  },
+  "dependencies": {
+    "embedded-postgres": "^18.4.0-beta.17",
+    "node-machine-id": "^1.1.12"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "@embedded-postgres/windows-x64",
+      "embedded-postgres"
+    ]
   }
 }
