@@ -1,0 +1,11 @@
+{
+  "name": "mailhub-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Packaged desktop build of MailHub (Electron + embedded Postgres) with license-gated activation.",
+  "scripts": {
+    "license:keygen": "node license/scripts/generate-keypair.js",
+    "license:issue": "node license/scripts/issue-license.js",
+    "license:test": "node license/scripts/self-test.js"
+  }
+}
