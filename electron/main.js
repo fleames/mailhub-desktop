@@ -7,6 +7,7 @@ const { loadStore, saveStore } = require("./license-store");
 const { loadOrCreateSecrets } = require("./secrets");
 const { createPostgres } = require("./postgres");
 const { startServer } = require("./server");
+const { mailhubMigrateEntry } = require("./resource-paths");
 const { spawn } = require("child_process");
 
 const PUBLIC_KEY = fs.readFileSync(
@@ -44,6 +45,7 @@ function checkStoredLicense(store) {
 function windowCommonOptions(extra) {
   return {
     backgroundColor: "#0a0b0f",
+    icon: path.join(__dirname, "assets", "icon.ico"),
     titleBarStyle: "hidden",
     titleBarOverlay: { color: "#101218", symbolColor: "#8b91a7", height: 32 },
     webPreferences: { contextIsolation: true, nodeIntegration: false },
@@ -104,7 +106,7 @@ function runMigrations(databaseUrl) {
   return new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,
-      [path.join(__dirname, "..", "vendor", "mailhub-migrate", "scripts", "migrate.mjs")],
+      [mailhubMigrateEntry()],
       {
         env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", DATABASE_URL: databaseUrl },
         stdio: ["ignore", "pipe", "pipe"],

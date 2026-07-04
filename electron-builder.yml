@@ -1,0 +1,46 @@
+appId: com.mailhub.desktop
+productName: MailHub
+copyright: Copyright (C) 2026 fleames
+
+directories:
+  output: dist
+
+# embedded-postgres chmods its own binaries at startup, which fails against
+# a path inside the virtual app.asar archive (asarUnpack copies the file
+# out physically, but the package's own __dirname-based path resolution
+# still points at the asar-internal path, and chmod can't be transparently
+# redirected the way reads are). Shipping unpacked sidesteps this — and
+# every native binary this app spawns (postgres, the bundled Next server's
+# whole node_modules) needed to be real files on disk anyway.
+asar: false
+
+files:
+  - electron/**/*
+  - license/verify.js
+  - license/format.js
+  - license/keys/public.pem
+  - "!license/keys/private.pem"
+  - "!license/issued/**"
+  - "!license/scripts/**"
+  - "!license/README.md"
+  - node_modules/**/*
+  - package.json
+
+# vendor/ is built by `pnpm run sync` right before packaging — it's not
+# committed, so this must run fresh each time (see scripts/sync-mailhub.js).
+extraResources:
+  - from: vendor/mailhub-server
+    to: mailhub-server
+  - from: vendor/mailhub-migrate
+    to: mailhub-migrate
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: electron/assets/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true

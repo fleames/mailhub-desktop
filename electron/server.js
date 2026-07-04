@@ -1,8 +1,7 @@
-const path = require("path");
 const { spawn } = require("child_process");
+const { mailhubServerEntry } = require("./resource-paths");
 
 const PORT = 34521; // uncommon on purpose, distinct from the embedded Postgres port
-const SERVER_ENTRY = path.join(__dirname, "..", "vendor", "mailhub-server", "server.js");
 
 /**
  * Spawns the bundled mailhub standalone server, waits for it to be healthy
@@ -14,7 +13,7 @@ const SERVER_ENTRY = path.join(__dirname, "..", "vendor", "mailhub-server", "ser
  * @returns {Promise<{ url: string, sessionCookie: string, stop: () => void }>}
  */
 async function startServer({ databaseUrl, storageDir, secrets }) {
-  const child = spawn(process.execPath, [SERVER_ENTRY], {
+  const child = spawn(process.execPath, [mailhubServerEntry()], {
     env: {
       ...process.env,
       // process.execPath is electron.exe, not plain node — without this it

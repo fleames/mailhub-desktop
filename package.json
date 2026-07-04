@@ -10,6 +10,7 @@
     "license:issue": "node license/scripts/issue-license.js",
     "license:test": "node license/scripts/self-test.js",
     "sync": "node scripts/sync-mailhub.js",
+    "prebuild:win": "pnpm run sync",
     "build:win": "electron-builder --win"
   },
   "dependencies": {
