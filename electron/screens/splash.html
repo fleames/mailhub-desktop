@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>MailHub</title>
+<link rel="stylesheet" href="splash.css" />
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="drag-region"></div>
+
+  <main class="wrap">
+    <div class="mark-large">
+      <svg viewBox="0 0 32 32" width="56" height="56">
+        <rect width="32" height="32" rx="8" fill="#6366f1"/>
+        <path d="M6 11.5 16 18l10-6.5V21a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-9.5Z" fill="#fff" opacity="0.95"/>
+        <path d="M6.4 9h19.2L16 15.2 6.4 9Z" fill="#fff"/>
+      </svg>
+    </div>
+    <h1>MailHub</h1>
+
+    <div class="steps" id="steps">
+      <div class="step" data-step="postgres">
+        <span class="dot"></span>
+        <span class="label">Starting the database</span>
+      </div>
+      <div class="step" data-step="migrate">
+        <span class="dot"></span>
+        <span class="label">Preparing your mailbox</span>
+      </div>
+      <div class="step" data-step="server">
+        <span class="dot"></span>
+        <span class="label">Opening MailHub</span>
+      </div>
+    </div>
+
+    <div class="error" id="error" style="display:none">
+      <p class="error-title">Something didn't start correctly</p>
+      <p class="error-detail" id="errorDetail"></p>
+      <button class="btn" id="retryBtn">Try again</button>
+    </div>
+  </main>
+
+  <script src="splash.js"></script>
+</body>
+</html>

@@ -4,3 +4,4 @@ license/issued/
 dist/
 out/
 .next-standalone/
+vendor/
