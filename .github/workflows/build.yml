@@ -1,0 +1,88 @@
+name: Build Windows executable
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout mailhub-desktop
+        uses: actions/checkout@v4
+        with:
+          path: mailhub-desktop
+
+      # mailhub-desktop vendors mailhub's build output rather than depending
+      # on it as a package (see scripts/sync-mailhub.js) - it's a private
+      # repo, so this needs a PAT with read access, not the default token.
+      - name: Checkout mailhub
+        uses: actions/checkout@v4
+        with:
+          repository: fleames/mailhub
+          token: ${{ secrets.MAILHUB_PAT }}
+          path: mailhub
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            mailhub/pnpm-lock.yaml
+            mailhub-desktop/pnpm-lock.yaml
+
+      - name: Install mailhub dependencies
+        working-directory: mailhub
+        run: pnpm install --frozen-lockfile
+
+      - name: Build mailhub
+        working-directory: mailhub
+        # Build-time only - no real secrets, no live services required.
+        # DATABASE_URL has a default in src/lib/env.ts; every route is
+        # rendered on demand, so `next build` never opens a DB connection.
+        env:
+          APP_PASSWORD: ci-placeholder
+          AUTH_SECRET: 00000000000000000000000000000000
+          INBOUND_SECRET: 0000000000000000
+        run: |
+          pnpm build
+          Copy-Item .next/static .next/standalone/.next/static -Recurse -Force
+          Copy-Item public .next/standalone/public -Recurse -Force
+
+      - name: Install mailhub-desktop dependencies
+        working-directory: mailhub-desktop
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync mailhub into vendor/
+        working-directory: mailhub-desktop
+        run: node scripts/sync-mailhub.js ../mailhub
+
+      - name: Package the Electron app
+        working-directory: mailhub-desktop
+        run: pnpm exec electron-builder --win
+
+      - name: Read version
+        id: version
+        working-directory: mailhub-desktop
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: MailHub-${{ steps.version.outputs.version }}-win-x64
+          path: |
+            mailhub-desktop/dist/*.exe
+            mailhub-desktop/dist/win-unpacked/**
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: mailhub-desktop/dist/*.exe
+          generate_release_notes: true

@@ -8,7 +8,7 @@
 [![Electron](https://img.shields.io/badge/Electron-33-47848F)](https://www.electronjs.org)
 [![Windows](https://img.shields.io/badge/platform-Windows-0078D6)](#requirements)
 
-Status: **private, pre-launch.** Will be released free and open source.
+**Free. Open source. No account, no license key, no activation screen.**
 
 </div>
 
@@ -29,10 +29,17 @@ unzip, double-click, use it. Under the hood it's an Electron shell that:
    no separate database install, data lives in your user profile
 2. Runs MailHub's own migrations against it
 3. Boots the actual MailHub Next.js server as a child process
-4. Auto-logs in and opens the real app in a native window
+4. Opens the real app in a native window — nothing to sign in to, nothing
+   to activate
 
 Nothing about MailHub itself is reimplemented — this repo only adds the
 "make it a normal app" layer around the upstream project.
+
+## Download
+
+Grab the latest build from [Releases](../../releases) (or the
+[Actions](../../actions/workflows/build.yml) tab for the most recent
+build off `main`), unzip, run `MailHub.exe`. That's it.
 
 ## Screenshots
 
@@ -70,6 +77,14 @@ connected yet.*
 
 ## Building
 
+The canonical build is the [GitHub Actions workflow](.github/workflows/build.yml)
+(`windows-latest`, no local environment quirks) — push a `v*.*.*` tag and it
+builds, packages, and attaches the installer to a GitHub Release. Trigger it
+manually from the Actions tab (`workflow_dispatch`) to get a build without
+tagging a release.
+
+To build locally instead:
+
 ```bash
 pnpm install
 ```
@@ -77,7 +92,7 @@ pnpm install
 Then either:
 
 - **Double-click `Build Release.bat`** — rebuilds `mailhub`, syncs it in,
-  and packages the app. This is the one-click path; see
+  and packages the app. This is the one-click local path; see
   [Build script internals](#build-script-internals) for what it actually
   does and why it's more involved than a plain `electron-builder` call.
 - **`pnpm start`** — runs it unpackaged, for development.
@@ -88,58 +103,40 @@ build of the same thing).
 ### Build script internals
 
 `build-release.ps1` doesn't just call `electron-builder`. In this
-development environment, electron-builder can't fully package a fresh build
-from scratch without Windows Developer Mode enabled (it downloads a
-Windows resource-editing tool as a 7z archive containing symlinks, and
-extracting those needs elevated privileges or Developer Mode). Rather than
-requiring that for every code change, the script **hot-patches** an
-existing `dist/win-unpacked` in place — overwriting just the bundled server
-and Electron source — and only falls back to a full `electron-builder` run
-when no packaged app exists yet. Pass `-FullRepackage` to force a real
-repackage (needed after changing `package.json` dependencies or
-`electron-builder.yml`).
-
-## Delivering a build to someone
-
-```powershell
-.\package-for-customer.ps1 -Email someone@example.com
-```
-
-(or double-click `Package For Customer.bat` and type the email when
-prompted). This issues a license, copies the packaged app into a delivery
-folder, drops the license file in next to `MailHub.exe`, adds a
-`Run MailHub.bat` launcher, and zips it up — ready to send. The app
-auto-detects a `*.license` file sitting next to its own exe and activates
-with it on first launch; no drag-and-drop, no pasting a key in.
-
-## A note on the license system
-
-`license/` implements a fully offline, Ed25519-signed license/activation
-system (see [`license/README.md`](license/README.md) for how it works) —
-built when the plan was to sell this as a paid product. That plan has
-changed: **MailHub Desktop is launching free.** The activation code is
-still in this repo and still runs today, and packaging/delivery still goes
-through it (see above) — that hasn't been decided one way or the other yet
-for the public release. Flagging it here rather than quietly ripping it out
-or quietly leaving it in.
+development environment specifically, electron-builder can't fully package
+a fresh build from scratch without Windows Developer Mode enabled (it
+downloads a Windows resource-editing tool as a 7z archive containing
+symlinks, and extracting those needs elevated privileges or Developer
+Mode) — this is a local-machine quirk, not something that affects the
+GitHub Actions build above. Rather than requiring Developer Mode for every
+local code change, the script **hot-patches** an existing
+`dist/win-unpacked` in place — overwriting just the bundled server and
+Electron source — and only falls back to a full `electron-builder` run when
+no packaged app exists yet locally. Pass `-FullRepackage` to force a real
+local repackage (needed after changing `package.json` dependencies or
+`electron-builder.yml`); if that fails with a symlink error, either enable
+Developer Mode or just rely on the GitHub Actions build instead.
 
 ## Architecture
 
 ```
-electron/main.js       Orchestrates boot: license check → splash → postgres
-                        → migrations → bundled server → main window → tray
+electron/main.js       Orchestrates boot: splash → postgres → migrations
+                        → bundled server → main window → tray
 electron/postgres.js   Embedded Postgres lifecycle (tuned for a single-user
                         desktop workload — small shared_buffers, no
                         parallel workers, JIT off)
 electron/server.js     Spawns mailhub's bundled Next.js server as a child
                         process, waits for /api/health, auto-logs in
 electron/secrets.js    Generates this install's local secrets once
-                        (app password, auth secret, DB password)
-license/               Ed25519 license issuing + offline verification
+                        (app password, auth secret, DB password) so the
+                        bundled server's own login screen is never shown
 scripts/sync-mailhub.js
                         Copies ../mailhub's standalone build + migrations
                         into vendor/ (gitignored, rebuilt before packaging)
 vendor/                The vendored mailhub build (gitignored)
+.github/workflows/build.yml
+                        Builds both repos and packages a Windows release
+                        on GitHub-hosted runners
 ```
 
 ## License

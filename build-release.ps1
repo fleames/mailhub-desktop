@@ -71,8 +71,6 @@ try {
         Mirror-Dir "$desktopDir\vendor\mailhub-server" "$unpackedDir\resources\mailhub-server"
         Mirror-Dir "$desktopDir\vendor\mailhub-migrate" "$unpackedDir\resources\mailhub-migrate"
         Mirror-Dir "$desktopDir\electron" "$unpackedDir\resources\app\electron"
-        Copy-Item "$desktopDir\license\verify.js" "$unpackedDir\resources\app\license\verify.js" -Force
-        Copy-Item "$desktopDir\license\format.js" "$unpackedDir\resources\app\license\format.js" -Force
         Ok "Hot-patched dist\win-unpacked"
         Warn "This only refreshes app code, not electron/native dependencies."
         Warn "Run with -FullRepackage after changing package.json or electron-builder.yml."

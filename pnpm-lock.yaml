@@ -11,9 +11,6 @@ importers:
       embedded-postgres:
         specifier: ^18.4.0-beta.17
         version: 18.4.0-beta.17
-      node-machine-id:
-        specifier: ^1.1.12
-        version: 1.1.12
       postgres:
         specifier: ^3.4.5
         version: 3.4.9
@@ -1022,9 +1019,6 @@ packages:
     resolution: {integrity: sha512-OQkWKbjQKbGkMf/xqI1jjy3oCTgMKJac58G2+bjZb3fza6gW2YrCSdMQYaoTb70crvE//Gngr4f0AgVHmqHvBQ==}
     engines: {node: ^12.13 || ^14.13 || >=16}
     hasBin: true
-
-  node-machine-id@1.1.12:
-    resolution: {integrity: sha512-QNABxbrPa3qEIfrE6GOJ7BYIuignnJw7iQ2YPbc3Nla1HzRJjXzZOiikfF8m7eAMfichLt3M4VgLOetqgDmgGQ==}
 
   nopt@6.0.0:
     resolution: {integrity: sha512-ZwLpbTgdhuZUnZzjd7nb1ZV+4DoiC6/sfiVKok72ym/4Tlf+DFdlHYmT2JPmcNNWV6Pi3SDf1kT+A4r9RTuT9g==}
@@ -2691,8 +2685,6 @@ snapshots:
     transitivePeerDependencies:
       - bluebird
       - supports-color
-
-  node-machine-id@1.1.12: {}
 
   nopt@6.0.0:
     dependencies:

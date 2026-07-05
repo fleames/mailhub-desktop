@@ -6,9 +6,8 @@ const PORT = 34521; // uncommon on purpose, distinct from the embedded Postgres 
 /**
  * Spawns the bundled mailhub standalone server, waits for it to be healthy
  * (which also proves the DB connection works — /api/health does `SELECT 1`),
- * then auto-logs-in on the customer's behalf using the locally-generated
- * appPassword so they never see mailhub's own /login screen after already
- * unlocking the app with their license.
+ * then auto-logs-in using the locally-generated appPassword so the user
+ * never sees mailhub's own /login screen.
  *
  * @returns {Promise<{ url: string, sessionCookie: string, stop: () => void }>}
  */

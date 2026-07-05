@@ -16,13 +16,6 @@ asar: false
 
 files:
   - electron/**/*
-  - license/verify.js
-  - license/format.js
-  - license/keys/public.pem
-  - "!license/keys/private.pem"
-  - "!license/issued/**"
-  - "!license/scripts/**"
-  - "!license/README.md"
   - node_modules/**/*
   - package.json
 

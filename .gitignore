@@ -1,6 +1,4 @@
 node_modules/
-license/keys/private.pem
-license/issued/
 dist/
 out/
 .next-standalone/

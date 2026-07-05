@@ -1,10 +1,10 @@
 /**
  * The bundled MailHub server still wants its own APP_PASSWORD/AUTH_SECRET/
- * INBOUND_SECRET (its `src/lib/env.ts` requires them, no defaults) — but a
- * customer who already unlocked the app with a license shouldn't ALSO see
- * mailhub's own login screen. So: generate these once per install, store
- * them locally, and have the Electron main process auto-login on the
- * server's behalf (see server.js) instead of showing that login page.
+ * INBOUND_SECRET (its `src/lib/env.ts` requires them, no defaults) — but
+ * there's no reason for a desktop user to see or manage that separately.
+ * Generate these once per install, store them locally, and have the
+ * Electron main process auto-login on the server's behalf (see server.js)
+ * instead of ever showing that login page.
  */
 const fs = require("fs");
 const path = require("path");
