@@ -26,6 +26,18 @@ function createPostgres(app, dbPassword) {
       // emoji default values (domain icons), which then fail to insert.
       // Force UTF8 regardless of what's installed on the customer's machine.
       initdbFlags: ["--encoding=UTF8", "--locale=C"],
+      // A single-user desktop mailbox never needs server-scale defaults —
+      // this trims both memory and the number of background/worker
+      // processes Postgres spawns without affecting correctness.
+      postgresFlags: [
+        "-c", "shared_buffers=32MB",
+        "-c", "max_connections=20",
+        "-c", "max_worker_processes=4",
+        "-c", "max_parallel_workers=0",
+        "-c", "max_parallel_workers_per_gather=0",
+        "-c", "io_workers=1",
+        "-c", "jit=off",
+      ],
     });
     if (!isInitialised(databaseDir)) {
       await pg.initialise();

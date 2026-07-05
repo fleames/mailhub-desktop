@@ -1,6 +1,16 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, session, Tray, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs");
+
+// This is a mail client, not a graphics app — the GPU process buys nothing
+// but ~100MB+ of extra memory and a background process. Cap renderer V8 heap
+// too, since Chromium's default scales with system RAM and this app's UI
+// doesn't need gigabytes of headroom.
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("disable-software-rasterizer");
+app.commandLine.appendSwitch("in-process-gpu"); // fold what's left into the main process instead of a separate one
+app.commandLine.appendSwitch("js-flags", "--max-old-space-size=384");
 const { machineIdSync } = require("node-machine-id");
 const { verifyLicense, loadLicenseFile } = require("../license/verify");
 const { loadStore, saveStore } = require("./license-store");
@@ -25,6 +35,17 @@ let runningServer = null; // { stop } from server.js, so we can shut it down on 
 function currentMachineId() {
   try {
     return machineIdSync(true);
+  } catch {
+    return null;
+  }
+}
+
+/** Looks for a `*.license` file sitting next to the exe — dropped there by the delivery package. */
+function findAdjacentLicenseFile() {
+  const dir = app.isPackaged ? path.dirname(app.getPath("exe")) : process.cwd();
+  try {
+    const match = fs.readdirSync(dir).find((f) => f.toLowerCase().endsWith(".license"));
+    return match ? path.join(dir, match) : null;
   } catch {
     return null;
   }
@@ -276,9 +297,23 @@ app.whenReady().then(() => {
   if (existing.valid) {
     createSplashWindow();
     splashWindow.once("ready-to-show", () => void bootApp());
-  } else {
-    createActivationWindow();
+    return;
   }
+
+  // Fully-automatic activation: a delivery package drops a `*.license` file
+  // next to the exe, so a fresh install can skip the activation screen
+  // entirely if it's there and valid. Falls through to the normal screen
+  // (not an error) if it's missing, unreadable, or invalid.
+  const adjacentPath = findAdjacentLicenseFile();
+  const adjacentLicense = adjacentPath ? loadLicenseFile(adjacentPath) : null;
+  const adjacentResult = adjacentLicense ? activate(adjacentLicense) : { valid: false };
+  if (adjacentResult.valid) {
+    createSplashWindow();
+    splashWindow.once("ready-to-show", () => void bootApp());
+    return;
+  }
+
+  createActivationWindow();
 });
 
 app.on("before-quit", () => {
