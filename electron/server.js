@@ -24,6 +24,9 @@ async function startServer({ databaseUrl, storageDir, secrets }) {
       HOSTNAME: "127.0.0.1",
       DATABASE_URL: databaseUrl,
       STORAGE_DIR: storageDir,
+      // Without this, links in notifications (and now the Microsoft OAuth
+      // redirect URI) fall back to the default localhost:3480 — wrong here.
+      APP_URL: `http://127.0.0.1:${PORT}`,
       APP_PASSWORD: secrets.appPassword,
       AUTH_SECRET: secrets.authSecret,
       INBOUND_SECRET: secrets.inboundSecret,

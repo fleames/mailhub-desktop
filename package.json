@@ -11,7 +11,8 @@
     "license:test": "node license/scripts/self-test.js",
     "sync": "node scripts/sync-mailhub.js",
     "prebuild:win": "pnpm run sync",
-    "build:win": "electron-builder --win"
+    "build:win": "electron-builder --win",
+    "release": "powershell -NoProfile -ExecutionPolicy Bypass -File build-release.ps1"
   },
   "dependencies": {
     "embedded-postgres": "^18.4.0-beta.17",
