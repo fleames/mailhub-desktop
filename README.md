@@ -141,7 +141,7 @@ vendor/                The vendored mailhub build (gitignored)
                         Builds both repos and packages a Windows release
                         on GitHub-hosted runners
 ```
-
+[![Launchpadly Startup Directory](https://launchpadly.co/embed/badges/startup/mail-hub.svg?variant=listed-on)](https://launchpadly.co/startup/mail-hub?ref=badge)
 ## License
 
 GPL-3.0, same as [`mailhub`](https://github.com/fleames/mailhub) itself —
