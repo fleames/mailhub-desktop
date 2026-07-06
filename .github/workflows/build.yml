@@ -15,13 +15,12 @@ jobs:
           path: mailhub-desktop
 
       # mailhub-desktop vendors mailhub's build output rather than depending
-      # on it as a package (see scripts/sync-mailhub.js) - it's a private
-      # repo, so this needs a PAT with read access, not the default token.
+      # on it as a package (see scripts/sync-mailhub.js). mailhub is public,
+      # so the default token can read it - no PAT needed.
       - name: Checkout mailhub
         uses: actions/checkout@v4
         with:
           repository: fleames/mailhub
-          token: ${{ secrets.MAILHUB_PAT }}
           path: mailhub
 
       - uses: pnpm/action-setup@v4
