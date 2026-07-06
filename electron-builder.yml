@@ -18,14 +18,17 @@ files:
   - electron/**/*
   - node_modules/**/*
   - package.json
+  # Packaged inside app/ (not extraResources) so it inherits
+  # resources/app/node_modules/postgres as an ancestor directory - see the
+  # long comment in electron/resource-paths.js for why this one specifically
+  # can't be a sibling of app/ the way mailhub-server is.
+  - vendor/mailhub-migrate/**/*
 
 # vendor/ is built by `pnpm run sync` right before packaging — it's not
 # committed, so this must run fresh each time (see scripts/sync-mailhub.js).
 extraResources:
   - from: vendor/mailhub-server
     to: mailhub-server
-  - from: vendor/mailhub-migrate
-    to: mailhub-migrate
 
 win:
   target:
