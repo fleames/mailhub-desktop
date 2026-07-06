@@ -5,6 +5,9 @@ on:
     tags: ["v*.*.*"]
   workflow_dispatch: {}
 
+permissions:
+  contents: write # needed to create the GitHub Release and attach files to it
+
 jobs:
   build:
     runs-on: windows-latest
