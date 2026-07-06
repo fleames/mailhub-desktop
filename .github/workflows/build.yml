@@ -66,7 +66,11 @@ jobs:
 
       - name: Package the Electron app
         working-directory: mailhub-desktop
-        run: pnpm exec electron-builder --win
+        # --publish never: electron-builder auto-detects a git tag and tries
+        # to publish via its own GitHub-release mechanism, which needs its
+        # own GH_TOKEN. The softprops/action-gh-release step below already
+        # handles the release, so disable electron-builder's redundant one.
+        run: pnpm exec electron-builder --win --publish never
 
       - name: Read version
         id: version
