@@ -21,6 +21,11 @@ let splashWindow = null;
 let mainWindow = null;
 let tray = null;
 let runningServer = null; // { stop } from server.js, so we can shut it down on quit
+// Created once and reused across bootApp() retries — recreating it per
+// attempt meant a retry after a later-stage failure tried to start a
+// second Postgres server on the same port while the first was still
+// running (see postgres.js's own idempotency guard too).
+let postgresController = null;
 
 function windowCommonOptions(extra) {
   return {
@@ -90,12 +95,14 @@ async function bootApp() {
   const storageDir = path.join(app.getPath("userData"), "storage");
   fs.mkdirSync(storageDir, { recursive: true });
 
-  const postgres = createPostgres(app, secrets.dbPassword);
+  if (!postgresController) {
+    postgresController = createPostgres(app, secrets.dbPassword);
+  }
 
   sendSplashStep("postgres", "active");
   let databaseUrl;
   try {
-    databaseUrl = await postgres.start();
+    databaseUrl = await postgresController.start();
   } catch (err) {
     sendSplashError("postgres", `Couldn't start the database: ${err?.message ?? String(err)}`);
     return;
@@ -189,9 +196,22 @@ app.whenReady().then(() => {
   splashWindow.once("ready-to-show", () => void bootApp());
 });
 
-app.on("before-quit", () => {
+// Electron doesn't wait for async work in "before-quit" unless the event is
+// held open — without this, the process can exit mid-shutdown of the
+// embedded Postgres server (pg_ctl stop takes real time), leaving it running
+// and holding the port for the next launch.
+let cleanShutdownDone = false;
+app.on("before-quit", (e) => {
   app.isQuitting = true;
+  if (cleanShutdownDone) return;
+  e.preventDefault();
   runningServer?.stop();
+  Promise.resolve(postgresController?.stop())
+    .catch(() => {})
+    .finally(() => {
+      cleanShutdownDone = true;
+      app.quit();
+    });
 });
 
 app.on("window-all-closed", () => {

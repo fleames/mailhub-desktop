@@ -12,8 +12,25 @@ function isInitialised(databaseDir) {
 function createPostgres(app, dbPassword) {
   const databaseDir = path.join(app.getPath("userData"), "pgdata");
   let pg = null;
+  let startPromise = null;
 
   async function start() {
+    // Idempotent: if start() already succeeded (or is in flight) on this
+    // controller, reuse it instead of spinning up a second server bound to
+    // the same port — this matters because a later boot step (migrate,
+    // server) can fail and the user can retry the whole sequence, which
+    // must not try to start Postgres twice.
+    if (startPromise) return startPromise;
+    startPromise = doStart();
+    try {
+      return await startPromise;
+    } catch (err) {
+      startPromise = null; // let a genuine failure be retried from scratch
+      throw err;
+    }
+  }
+
+  async function doStart() {
     const { default: EmbeddedPostgres } = await import("embedded-postgres");
     pg = new EmbeddedPostgres({
       databaseDir,
