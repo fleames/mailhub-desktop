@@ -11,7 +11,10 @@
 **Free. Open source. No account, no license key, no activation screen.**
 
 </div>
-
+<!-- Launchpadly — Mail Hub (listed-on) -->
+<a href="https://launchpadly.co/startup/mail-hub?ref=badge" target="_blank" rel="noopener noreferrer" data-launchpadly-badge="mail-hub" data-launchpadly-badge-variant="listed-on">
+  <img src="https://launchpadly.co/embed/badges/startup/mail-hub.svg?variant=listed-on" alt="Launchpadly Startup Directory" width="260" height="48" style="display:block;border:0;" />
+</a>
 ---
 
 ## What this is
