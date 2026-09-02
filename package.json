@@ -1,6 +1,6 @@
 {
   "name": "mailhub-desktop",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "Packaged desktop build of MailHub (Electron + embedded Postgres) - free, one-click install.",
   "license": "GPL-3.0",
