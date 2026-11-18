@@ -17,7 +17,7 @@ const secrets = JSON.parse(fs.readFileSync(path.join(userDataDir, "secrets.json"
 const inner = [
   "pg_dump -U mailhub -d mailhub --data-only --disable-triggers -Fc |",
   "PGPASSWORD=\"$TARGET_PGPASSWORD\"",
-  "pg_restore -h host.docker.internal -p 54329 -U mailhub -d mailhub --data-only --disable-triggers",
+  "pg_restore -h host.docker.internal -p 15439 -U mailhub -d mailhub --data-only --disable-triggers",
 ].join(" ");
 
 const child = spawn("docker", ["exec", "-e", `TARGET_PGPASSWORD=${secrets.dbPassword}`, "mailhub-db-1", "sh", "-c", inner], {

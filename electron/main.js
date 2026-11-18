@@ -104,7 +104,11 @@ async function bootApp() {
   try {
     databaseUrl = await postgresController.start();
   } catch (err) {
-    sendSplashError("postgres", `Couldn't start the database: ${err?.message ?? String(err)}`);
+    const detail =
+      (err && typeof err === "object" && err.message) ||
+      (typeof err === "string" && err) ||
+      "the database process exited unexpectedly. If MailHub is already in the system tray, open it from there.";
+    sendSplashError("postgres", `Couldn't start the database: ${detail}`);
     return;
   }
   sendSplashStep("postgres", "done");
@@ -191,10 +195,29 @@ function createTray() {
 ipcMain.handle("app:get-version", () => app.getVersion());
 ipcMain.on("splash:retry", () => void bootApp());
 
-app.whenReady().then(() => {
-  createSplashWindow();
-  splashWindow.once("ready-to-show", () => void bootApp());
-});
+// Closing the window hides to the tray — without this lock, clicking the
+// shortcut starts a second process that fights the first for Postgres
+// (the Postgres port / the same pgdata) and dies with an empty reject().
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    } else if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.show();
+      splashWindow.focus();
+    }
+  });
+
+  app.whenReady().then(() => {
+    createSplashWindow();
+    splashWindow.once("ready-to-show", () => void bootApp());
+  });
+}
 
 // Electron doesn't wait for async work in "before-quit" unless the event is
 // held open — without this, the process can exit mid-shutdown of the
